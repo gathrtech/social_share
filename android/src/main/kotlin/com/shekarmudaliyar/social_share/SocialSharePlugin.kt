@@ -149,54 +149,28 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
         } else if (call.method == "shareSms") {
             //shares content on sms
             val content: String? = call.argument("message")
-            val image: String? = call.argument("image")
-            val messaging = hasPackage("com.samsung.android.messaging")
-            val mms = hasPackage("com.android.mms")
-            val intent = Intent(Intent.ACTION_SEND)
-            if (messaging) intent.setClassName(
-                "com.samsung.android.messaging",
-                "com.samsung.android.messaging.ui.view.main.WithActivity"
-            )
-            if (mms) intent.setClassName(
-                "com.android.mms",
-                "com.android.mms.ui.ComposeMessageActivity"
-            )
+            val intent = Intent(Intent.ACTION_SENDTO)
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.type = "vnd.android-dir/mms-sms"
+            intent.data = Uri.parse("sms:" )
             intent.putExtra("sms_body", content)
-            if (image != null && image.length > 0) {
-                //check if  image is also provided
-                val imagefile =  File(registrar.activeContext().cacheDir,image)
-                val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
-                intent.type = "image/*"
-                intent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
-            } else {
-                intent.type = "text/plain"
-            }
             try {
                 activity!!.startActivity(intent)
                 result.success("true")
             } catch (ex: ActivityNotFoundException) {
-                ex.printStackTrace()
                 result.success("false")
             }
         } else if (call.method == "shareTwitter") {
             //shares content on twitter
-            val captionText: String? = call.argument("captionText")
+            val text: String? = call.argument("captionText")
             val url: String? = call.argument("url")
             val trailingText: String? = call.argument("trailingText")
-            val image: String? = call.argument("image")
-            val text = "$captionText $trailingText $url".trim()
-
-            val builder = TweetComposer.Builder(registrar.activity()).text(text)
-            if (url != null && url.length > 0) {
-                builder.url(URL(url))
-            }
-            if (image != null && image.length > 0) {
-                val file =  File(registrar.activeContext().cacheDir,image)
-                val stickerImageFile = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", file)
-                builder.image(stickerImageFile)
-            }
+            val urlScheme = "http://www.twitter.com/intent/tweet?text=$text$url$trailingText"
+            Log.d("log",urlScheme)
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(urlScheme)
             try {
-                builder.show()
+                activity!!.startActivity(intent)
                 result.success("true")
             } catch (ex: ActivityNotFoundException) {
                 result.success("false")
@@ -244,24 +218,6 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun hasPackage(type: String): Boolean {
-        val share = Intent(Intent.ACTION_SEND)
-        share.type = "text/plain"
-        val resInfo: List<ResolveInfo> = registrar.activity()
-            .getPackageManager()
-            .queryIntentActivities(share, 0)
-        if (resInfo.isNotEmpty()) {
-            for (info in resInfo) {
-                val packageName = info.activityInfo.packageName.toLowerCase()
-                val name = info.activityInfo.name.toLowerCase()
-                if (packageName.contains(type) || name.contains(type)) {
-                    return true;
-                }
-            }
-        }
-        return false
-    }
-    
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
