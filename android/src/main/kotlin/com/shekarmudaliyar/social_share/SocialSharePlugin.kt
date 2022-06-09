@@ -261,7 +261,7 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         return false
     }
-}
+    
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
     }
