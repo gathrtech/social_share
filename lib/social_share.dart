@@ -14,25 +14,18 @@ class SocialShare {
     String? backgroundBottomColor,
     String? attributionURL,
     String? backgroundImagePath,
+    String? linkToCopy,
   }) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
-      if (backgroundImagePath == null) {
-        args = <String, dynamic>{
-          "stickerImage": imagePath,
-          "backgroundTopColor": backgroundTopColor,
-          "backgroundBottomColor": backgroundBottomColor,
-          "attributionURL": attributionURL
-        };
-      } else {
-        args = <String, dynamic>{
-          "stickerImage": imagePath,
-          "backgroundImage": backgroundImagePath,
-          "backgroundTopColor": backgroundTopColor,
-          "backgroundBottomColor": backgroundBottomColor,
-          "attributionURL": attributionURL
-        };
-      }
+      args = <String, dynamic>{
+        "stickerImage": imagePath,
+        "backgroundImage": backgroundImagePath,
+        "backgroundTopColor": backgroundTopColor,
+        "backgroundBottomColor": backgroundBottomColor,
+        "attributionURL": attributionURL,
+        "linkToCopy": linkToCopy,
+      };
     } else {
       File file = File(imagePath);
       final bytes = file.readAsBytesSync();

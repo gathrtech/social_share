@@ -28,9 +28,9 @@ class _MyAppState extends State<MyApp> {
 
     if (!mounted) return;
 
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+    // setState(() {
+    //   _platformVersion = platformVersion;
+    // });
   }
 
   ScreenshotController screenshotController = ScreenshotController();
@@ -60,14 +60,15 @@ class _MyAppState extends State<MyApp> {
                     final file = await ImagePicker().pickImage(
                       source: ImageSource.gallery,
                     );
-                    SocialShare.shareInstagramStory(
-                      file.path,
-                      backgroundTopColor: "#ffffff",
-                      backgroundBottomColor: "#000000",
-                      attributionURL: "https://deep-link-url",
-                    ).then((data) {
-                      print(data);
-                    });
+                    if (file != null)
+                      SocialShare.shareInstagramStory(
+                        file.path,
+                        backgroundTopColor: "#ffffff",
+                        backgroundBottomColor: "#000000",
+                        attributionURL: "https://deep-link-url",
+                      ).then((data) {
+                        print(data);
+                      });
                   },
                   child: Text("Share On Instagram Story"),
                 ),
@@ -78,6 +79,10 @@ class _MyAppState extends State<MyApp> {
                           await getApplicationDocumentsDirectory();
                       final file =
                           await File('${directory.path}/temp.png').create();
+
+                      if (image == null) {
+                        return;
+                      }
                       await file.writeAsBytes(image);
 
                       SocialShare.shareInstagramStory(
@@ -100,6 +105,9 @@ class _MyAppState extends State<MyApp> {
                           await getApplicationDocumentsDirectory();
                       final file =
                           await File('${directory.path}/temp.png').create();
+                      if (image == null) {
+                        return;
+                      }
                       await file.writeAsBytes(image);
                       //facebook appId is mandatory for andorid or else share won't work
                       Platform.isAndroid

@@ -22,7 +22,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.io.File
 import java.net.URL
 
-class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
+class SocialSharePlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
     private var activity: Activity? = null
     private var activeContext: Context? = null
