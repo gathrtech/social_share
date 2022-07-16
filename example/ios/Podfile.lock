@@ -4,14 +4,22 @@ PODS:
     - Flutter
   - path_provider_ios (0.0.1):
     - Flutter
+  - SnapSDK/SCSDKCoreKit (2.2.0)
+  - SnapSDK/SCSDKCreativeKit (2.2.0):
+    - SnapSDK/SCSDKCoreKit
   - social_share (0.0.1):
     - Flutter
+    - SnapSDK/SCSDKCreativeKit (= 2.2.0)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - social_share (from `.symlinks/plugins/social_share/ios`)
+
+SPEC REPOS:
+  trunk:
+    - SnapSDK
 
 EXTERNAL SOURCES:
   Flutter:
@@ -27,8 +35,9 @@ SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  social_share: 702a5e3842addd22db515aa9e1e00a4b80a0296d
+  SnapSDK: 3b2d0d58c90f2b65a0a004bcadfa1372714e4cec
+  social_share: 4c5dc1c29c3e7616fd278d8646726c005cbaef3f
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: a57bf92c3d677b7e16abbd694db1159caca1accc
 
 COCOAPODS: 1.11.3

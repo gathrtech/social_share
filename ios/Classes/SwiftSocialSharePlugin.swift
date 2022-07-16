@@ -3,41 +3,74 @@ import UIKit
 import UniformTypeIdentifiers
 import Social
 import MessageUI
+import SCSDKCreativeKit
 
 public let ShareToInstagramNotifiction: Notification.Name = .init(rawValue: "ShareToInstagramNotification")
 
 public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeViewControllerDelegate {
-  public static func register(with registrar: FlutterPluginRegistrar) {
-    let channel = FlutterMethodChannel(name: "social_share", binaryMessenger: registrar.messenger())
-    let instance = SwiftSocialSharePlugin()
-    registrar.addMethodCallDelegate(instance, channel: channel)
-  }
-
-  public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-
-    switch call.method {
-    case "shareInstagramStory":
-        shareInstagramStory(call, result: result)
-    case "shareFacebookStory":
-        shareFacebookStory(call, result: result)
-    case "copyToClipboard":
-        copyToClipboard(call, result: result)
-    case "shareTwitter":
-        shareTwitter(call, result: result)
-    case "shareSms":
-        shareSms(call, result: result)
-    case "shareWhatsapp":
-        shareWhatsapp(call, result: result)
-    case "shareTelegram":
-        shareTelegram(call, result: result)
-    case "shareOptions":
-        shareOptions(call, result: result)
-    case "checkInstalledApps":
-        checkInstalledApps(call, result: result)
-    default:
-        result(FlutterMethodNotImplemented)
+    
+    var snapApi: SCSDKSnapAPI?
+    
+    public static func register(with registrar: FlutterPluginRegistrar) {
+        let channel = FlutterMethodChannel(name: "social_share", binaryMessenger: registrar.messenger())
+        let instance = SwiftSocialSharePlugin()
+        registrar.addMethodCallDelegate(instance, channel: channel)
     }
-  }
+
+    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        switch call.method {
+        case "shareInstagramStory":
+            shareInstagramStory(call, result: result)
+        case "shareFacebookStory":
+            shareFacebookStory(call, result: result)
+        case "copyToClipboard":
+            copyToClipboard(call, result: result)
+        case "shareTwitter":
+            shareTwitter(call, result: result)
+        case "shareSms":
+            shareSms(call, result: result)
+        case "shareWhatsapp":
+            shareWhatsapp(call, result: result)
+        case "shareTelegram":
+            shareTelegram(call, result: result)
+        case "shareSnapchat":
+            shareSnapchat(call, result: result)
+        case "shareOptions":
+            shareOptions(call, result: result)
+        case "checkInstalledApps":
+            checkInstalledApps(call, result: result)
+        default:
+            result(FlutterMethodNotImplemented)
+        }
+    }
+    
+    func shareSnapchat(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let arguments = call.arguments as? [String: Any] else {
+            result("call arguments not valid")
+            return
+        }
+        
+        guard let imageFile = arguments["sticker"] as? String, let snapImage = UIImage(contentsOfFile: imageFile) else {
+            result("photo missing")
+            return
+        }
+                
+        let sticker = SCSDKSnapSticker(stickerImage: snapImage)
+        
+        let snap = SCSDKNoSnapContent()
+        snap.sticker = sticker
+        snap.caption = arguments["caption"] as? String
+        snap.attachmentUrl = arguments["urlLink"] as? String
+        
+        if (self.snapApi == nil) {
+            self.snapApi = SCSDKSnapAPI()
+        }
+        
+        snapApi!.startSending(snap) { (err: Error?) in
+            debugPrint(err?.localizedDescription)
+            result("sharing")
+        }
+    }
     
     func shareOptions(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let arguments = call.arguments as? [String: Any] else {
@@ -48,7 +81,7 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
         var content: [Any] = []
         
         guard
-            let message = arguments["message"] as? String
+            let message = arguments["content"] as? String
         else {
             result("Missing required message parameter")
             return
@@ -81,7 +114,7 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
         }
 
         guard
-            let message = arguments["message"] as? String,
+            let message = arguments["content"] as? String,
             let formatted = message.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed),
             let urlScheme = URL(string: "whatsapp://send?text=\(formatted)")
         else {
@@ -109,7 +142,7 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
         }
 
         guard
-            let message = arguments["message"] as? String,
+            let message = arguments["content"] as? String,
             let formatted = message.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed),
             let urlScheme = URL(string: "tg://msg?text=\(formatted)")
         else {
@@ -152,7 +185,14 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
             
             let messageVc = MFMessageComposeViewController()
             
-            messageVc.body = message
+            let body: String
+            if let url = arguments["urlLink"] as? String {
+                body = "\(message) \(url)"
+            } else {
+                body = message
+            }
+
+            messageVc.body = body
             messageVc.messageComposeDelegate = self
             
             if let imageFile = arguments["image"] as? String, let uiImage = UIImage(contentsOfFile: imageFile), let imageData = uiImage.jpegData(compressionQuality: 1.0) {
@@ -441,6 +481,7 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
             "sms": UIApplication.shared.canOpenURL(URL(string: "sms://")!),
             "whatsapp": UIApplication.shared.canOpenURL(URL(string: "whatsapp://")!),
             "telegram": UIApplication.shared.canOpenURL(URL(string: "tg://")!),
+            "snapchat": UIApplication.shared.canOpenURL(URL(string: "snapchat://")!),
         ]
         
         result(installedApps)

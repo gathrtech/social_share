@@ -63,11 +63,13 @@ class SocialShare {
   }
 
   static Future<String?> shareFacebookStory(
-      String imagePath,
-      String backgroundTopColor,
-      String backgroundBottomColor,
-      String attributionURL,
-      {String? appId}) async {
+    String imagePath, {
+    String? backgroundTopColor,
+    String? backgroundBottomColor,
+    String? attributionURL,
+    String? backgroundImagePath,
+    String? linkToCopy,
+  }) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
       args = <String, dynamic>{
@@ -90,7 +92,6 @@ class SocialShare {
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL,
-        "appId": appId
       };
     }
     final String? response =
@@ -197,6 +198,20 @@ class SocialShare {
     return version;
   }
 
+  static Future<String?> shareSnapchat({
+    required String stickerPath,
+    String? urlLink,
+    String? caption,
+  }) async {
+    final Map<String, dynamic> args = <String, dynamic>{
+      "sticker": stickerPath,
+      "urlLink": urlLink,
+      "caption": caption,
+    };
+    final String? response = await _channel.invokeMethod('shareSnapchat', args);
+    return response;
+  }
+
   static Future<bool?> copyToClipboard(content) async {
     final Map<String, String> args = <String, String>{
       "content": content.toString()
@@ -235,8 +250,9 @@ class SocialShare {
     return version;
   }
 
-  static Future<Map?> checkInstalledAppsForShare() async {
-    final Map? apps = await _channel.invokeMethod('checkInstalledApps');
+  static Future<Map<String, bool>?> checkInstalledAppsForShare() async {
+    final Map<String, bool>? apps =
+        Map.from(await _channel.invokeMethod('checkInstalledApps'));
     return apps;
   }
 
