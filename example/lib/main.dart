@@ -113,18 +113,17 @@ class _MyAppState extends State<MyApp> {
                       Platform.isAndroid
                           ? SocialShare.shareFacebookStory(
                               file.path,
-                              "#ffffff",
-                              "#000000",
-                              "https://google.com",
-                              appId: "xxxxxxxxxxxxx",
+                              backgroundTopColor: "#ffffff",
+                              backgroundBottomColor: "#000000",
+                              attributionURL: "https://google.com",
                             ).then((data) {
                               print(data);
                             })
                           : SocialShare.shareFacebookStory(
                               file.path,
-                              "#ffffff",
-                              "#000000",
-                              "https://google.com",
+                              backgroundTopColor: "#ffffff",
+                              backgroundBottomColor: "#000000",
+                              attributionURL: "https://google.com",
                             ).then((data) {
                               print(data);
                             });

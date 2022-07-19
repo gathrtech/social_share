@@ -385,6 +385,13 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
                 background = UIImage(contentsOfFile: backgroundImage)
             }
         }
+
+        var backgroundVideo: NSData?
+        if let videoPath = arguments["backgroundVideoPath"] as? String {
+            if FileManager.default.fileExists(atPath: videoPath) {
+                backgroundVideo = NSData(contentsOfFile: videoPath)
+            }
+        }
         
         let storiesUrl = URL(string: "instagram-stories://share")!
 
@@ -413,7 +420,10 @@ public class SwiftSocialSharePlugin: NSObject, FlutterPlugin, MFMessageComposeVi
                 pasteboardItems["com.instagram.sharedSticker.contentURL"] = attributionURL
             }
 
-            
+            if let backgroundVideo = backgroundVideo {
+                pasteboardItems["com.instagram.sharedSticker.backgroundVideo"] = backgroundVideo
+            }
+
             if #available(iOS 10, *) {
                 
                 let opts = [

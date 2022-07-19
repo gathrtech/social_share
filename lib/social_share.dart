@@ -15,6 +15,7 @@ class SocialShare {
     String? attributionURL,
     String? backgroundImagePath,
     String? linkToCopy,
+    String? backgroundVideoPath,
   }) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
@@ -25,34 +26,32 @@ class SocialShare {
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL,
         "linkToCopy": linkToCopy,
+        "backgroundVideoPath": backgroundVideoPath,
       };
     } else {
-      File file = File(imagePath);
-      final bytes = file.readAsBytesSync();
-      final tempDir = await getTemporaryDirectory();
-      final imageName = 'stickerAsset.png';
-      final imageDataPath = '${tempDir.path}/$imageName';
-      final imageAsList = bytes.buffer.asUint8List();
-      file = await File(imageDataPath).create();
-      file.writeAsBytesSync(imageAsList);
+      File stickerFile = File(imagePath);
+      String stickerPath = stickerFile.uri.pathSegments.last;
 
       String? backgroundAssetName;
       if (backgroundImagePath != null) {
         File backgroundImage = File(backgroundImagePath);
-        Uint8List backgroundImageData = backgroundImage.readAsBytesSync();
-        backgroundAssetName = 'backgroundAsset.jpg';
-        final Uint8List backgroundAssetAsList = backgroundImageData;
-        final backgroundAssetPath = '${tempDir.path}/$backgroundAssetName';
-        File backFile = await File(backgroundAssetPath).create();
-        backFile.writeAsBytesSync(backgroundAssetAsList);
+        backgroundAssetName = backgroundImage.uri.pathSegments.last;
+      }
+
+      String? backgroundVideoAssetName;
+      if (backgroundVideoPath != null) {
+        File backgroundVideo = File(backgroundVideoPath);
+        backgroundVideoAssetName = backgroundVideo.uri.pathSegments.last;
       }
 
       args = <String, dynamic>{
-        "stickerImage": imageName,
+        "stickerImage": stickerPath,
         "backgroundImage": backgroundAssetName,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL,
+        "linkToCopy": linkToCopy,
+        "backgroundVideoPath": backgroundVideoAssetName,
       };
     }
     final String? response = await _channel.invokeMethod(
@@ -203,11 +202,24 @@ class SocialShare {
     String? urlLink,
     String? caption,
   }) async {
-    final Map<String, dynamic> args = <String, dynamic>{
-      "sticker": stickerPath,
-      "urlLink": urlLink,
-      "caption": caption,
-    };
+    Map<String, dynamic> args;
+    if (Platform.isIOS) {
+      args = <String, dynamic>{
+        "sticker": stickerPath,
+        "urlLink": urlLink,
+        "caption": caption,
+      };
+    } else {
+      File file = File(stickerPath);
+      String stickerName = file.uri.pathSegments.last;
+
+      args = <String, dynamic>{
+        "sticker": stickerName,
+        "urlLink": urlLink,
+        "caption": caption,
+      };
+    }
+
     final String? response = await _channel.invokeMethod('shareSnapchat', args);
     return response;
   }
